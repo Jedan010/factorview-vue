@@ -78,13 +78,14 @@ async def get_factor_stats_backtest(request: Request):
     params = {k: v if v else None for k, v in request.query_params.items()}
     if "factor_names" in params and params["factor_names"]:
         params["factor_names"] = params["factor_names"].split(",")
-    df = load_factor_stats_backtest(**params)
+    backtest_dict = load_factor_stats_backtest(**params)
     return JSONResponse(
         {
-            "backtest": {
+            name: {
                 "values": clean_for_json(df),
                 "index": clean_for_json(df.index),
             }
+            for name, df in backtest_dict.items()
         }
     )
 

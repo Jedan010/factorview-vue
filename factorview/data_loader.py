@@ -297,30 +297,34 @@ def load_factor_stats_backtest(
     benchmark_index: str = "000905.SH",
     **kwargs,
 ):
-    backtest_df = FactorManagerAll.get_perf_factor(
-        perf_type="backtest_ret",
-        factor_names=factor_names,
-        start_date=start_date,
-        end_date=end_date,
-        index_col="date",
-        fields=[
-            "strategy_ret",
-            "index_ret",
-            "excess_ret",
-            "holding_num",
-            "turnover",
-            "transaction_fee",
-        ],
-        query=[
-            ("pool", pool),
-            ("optimizer_index", optimizer_index),
-            ("benchmark_index", benchmark_index),
-        ],
-        is_cache=True,
-        **kwargs,
-    )
+    factor_names = FactorManagerAll.get_factor_names(factor_names=factor_names)
+    res = {}
+    for name in factor_names:
+        backtest_df = FactorManagerAll.get_perf_factor(
+            perf_type="backtest_ret",
+            factor_names=factor_names,
+            start_date=start_date,
+            end_date=end_date,
+            index_col="date",
+            fields=[
+                "strategy_ret",
+                "index_ret",
+                "excess_ret",
+                "holding_num",
+                "turnover",
+                "transaction_fee",
+            ],
+            query=[
+                ("pool", pool),
+                ("optimizer_index", optimizer_index),
+                ("benchmark_index", benchmark_index),
+            ],
+            is_cache=True,
+            **kwargs,
+        )
+        res[name] = backtest_df
 
-    return backtest_df
+    return res
 
 
 def load_strategy_info(
