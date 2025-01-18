@@ -3,13 +3,19 @@
     <table>
       <thead>
         <tr>
-          <th v-for="column in columns" :key="column.key" @click="sortTable(column.key)">
+          <th>
+            <input type="checkbox" v-model="isAllSelected" @change="toggleSelectAll" />
+          </th>
+          <th v-for="column in columns.slice(1)" :key="column.key" @click="sortTable(column.key)">
             {{ column.label }}
           </th>
         </tr>
       </thead>
       <tbody>
         <tr v-for="factor in sortedFactors" :key="factor.name">
+          <td>
+            <input type="checkbox" :value="factor.name" v-model="selectedFactors" />
+          </td>
           <td>
             <router-link :to="`/factor/${factor.name}`">
               {{ factor.name }}
@@ -32,7 +38,7 @@
 </template>
 
 <script>
-import { computed, ref } from 'vue'
+import { computed, ref, watch } from 'vue'
 
 export default {
   props: {
@@ -43,6 +49,7 @@ export default {
   },
   setup(props) {
     const columns = [
+      { key: 'select', label: '选择', width: '50px' },
       { key: 'name', label: '因子名称' },
       { key: 'startDate', label: '开始日期' },
       { key: 'endDate', label: '结束日期' },
@@ -59,6 +66,9 @@ export default {
     const sortColumn = ref('name')
     const sortOrder = ref('asc')
     
+    const selectedFactors = ref([])
+    const isAllSelected = ref(false)
+
     const factors = computed(() => {
       if (!props.factorData?.factor_info?.index) {
         return [];
@@ -105,6 +115,18 @@ export default {
       }
     }
 
+    const toggleSelectAll = () => {
+      if (isAllSelected.value) {
+        selectedFactors.value = sortedFactors.value.map(f => f.name)
+      } else {
+        selectedFactors.value = []
+      }
+    }
+
+    watch(selectedFactors, (newVal) => {
+      isAllSelected.value = newVal.length === sortedFactors.value.length
+    })
+
     const formatDate = (date) => {
       return new Date(date).toLocaleDateString()
     }
@@ -125,7 +147,10 @@ export default {
       sortTable,
       formatDate,
       formatNumber,
-      formatPercent
+      formatPercent,
+      selectedFactors,
+      isAllSelected,
+      toggleSelectAll
     }
   }
 }
