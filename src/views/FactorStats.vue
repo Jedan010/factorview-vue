@@ -22,34 +22,52 @@
         {{ error }}
       </div>
 
-      <div v-if="isLoading">
-        <div class="loading-indicator">
+      <FactorStatsTable :factorData="response" />
+      
+      <div class="backtest-toggle">
+        <button
+          class="compare-btn"
+          @click="toggleBacktest"
+        >
+          {{ showBacktest ? '隐藏回测收益对比' : '显示回测收益对比' }}
+        </button>
+        
+        <div v-if="showBacktest && backtestLoading" class="loading-indicator">
           <div class="loader"></div>
-          数据加载中...
+          回测数据加载中...
         </div>
       </div>
 
-      <FactorStatsTable :factorData="response" />
+      <template v-if="showBacktest && !backtestLoading">
+        <FactorStatsBacktest v-if="backtestData.length > 0" :backtestData="backtestData" />
+        <FactorStatsBacktestTable v-if="backtestData.length > 0" :backtestData="backtestData" :isDarkMode="isDarkMode" />
+      </template>
 
     </div>
   </div>
 </template>
 
 <script>
-import { getFactorStats } from '@/api/factor';
+import { getFactorStats, getFactorStatsBacktest } from '@/api/factor';
 import moment from 'moment';
 import FactorFilter from '@/components/Filter.vue';
 import FactorStatsTable from '@/components/FactorStatsTable.vue';
+import FactorStatsBacktest from '@/components/FactorStatsBacktest.vue';
+import FactorStatsBacktestTable from '@/components/FactorStatsBacktestTable.vue';
 
 export default {
   components: {
     FactorFilter,
-    FactorStatsTable
+    FactorStatsTable,
+    FactorStatsBacktest,
+    FactorStatsBacktestTable
   },
   name: 'FactorStats',
   data() {
     return {
       response: [],
+      backtestData: [],
+      backtestLoading: false,
       isLoading: false,
       error: null,
       isDarkMode: false,
@@ -71,7 +89,7 @@ export default {
       this.fetchFactors();
     },
 
-    async fetchFactors() {
+    async fetchFactors(fetchBacktest = false) {
       this.isLoading = true;
       this.error = null;
 
@@ -94,6 +112,21 @@ export default {
         };
 
         this.response = await getFactorStats(params);
+        if (fetchBacktest || this.showBacktest) {
+          const backtestResponse = await getFactorStatsBacktest(params);
+          this.backtestData = Object.entries(backtestResponse).map(([name, data]) => {
+            const dates = data.index.map(date => moment(date).format('YYYY-MM-DD'));
+            return {
+              name,
+              values: data.values.excess_ret,
+              index: dates,
+              index_ret: data.values.index_ret,
+              holding_num: data.values.holding_num,
+              turnover: data.values.turnover,
+              transaction_fee: data.values.transaction_fee,
+            };
+          });
+        }
       } catch (error) {
         console.error('Error fetching factors:', error);
         this.error = '数据加载失败，请稍后重试';
@@ -104,6 +137,21 @@ export default {
     toggleDarkMode() {
       this.isDarkMode = !this.isDarkMode;
       document.documentElement.classList.toggle('dark', this.isDarkMode);
+    },
+    
+    async toggleBacktest() {
+      this.showBacktest = !this.showBacktest;
+      if (this.showBacktest && this.backtestData.length === 0) {
+        this.backtestLoading = true;
+        try {
+          await this.fetchFactors(true);
+        } catch (error) {
+          console.error('Error fetching backtest data:', error);
+          this.error = '回测数据加载失败，请稍后重试';
+        } finally {
+          this.backtestLoading = false;
+        }
+      }
     }
   },
   mounted() {
@@ -114,6 +162,35 @@ export default {
 
 <style scoped lang="scss">
 @use '../assets/styles/base-factor';
+
+.backtest-toggle {
+  margin: 20px 0;
+  text-align: center;
+}
+
+.compare-btn {
+  padding: 0.75rem 1.5rem;
+  background: linear-gradient(145deg, #3498db, #2980b9);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  box-shadow: 0 2px 4px rgba(52, 152, 219, 0.2);
+  cursor: pointer;
+
+  &:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(52, 152, 219, 0.3);
+  }
+
+  &:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 4px rgba(52, 152, 219, 0.2);
+  }
+}
 
 .factor-info-container {
   @extend .base-container;
