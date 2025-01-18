@@ -299,10 +299,10 @@ def load_factor_stats_backtest(
 ):
     factor_names = FactorManagerAll.get_factor_names(factor_names=factor_names)
     res = {}
-    for name in factor_names:
+    for factor_name in factor_names:
         backtest_df = FactorManagerAll.get_perf_factor(
             perf_type="backtest_ret",
-            factor_names=factor_names,
+            factor_names=factor_name,
             start_date=start_date,
             end_date=end_date,
             index_col="date",
@@ -322,7 +322,7 @@ def load_factor_stats_backtest(
             is_cache=True,
             **kwargs,
         )
-        res[name] = backtest_df
+        res[factor_name] = backtest_df
 
     return res
 
