@@ -288,6 +288,41 @@ def load_factor_perf(
     return (ic_df, group_df, backtest_df)
 
 
+def load_factor_stats_backtest(
+    factor_names: list[str] = None,
+    start_date: str = None,
+    end_date: str = None,
+    pool: str = "all",
+    optimizer_index: str = "000905.SH",
+    benchmark_index: str = "000905.SH",
+    **kwargs,
+):
+    backtest_df = FactorManagerAll.get_perf_factor(
+        perf_type="backtest_ret",
+        factor_names=factor_names,
+        start_date=start_date,
+        end_date=end_date,
+        index_col="date",
+        fields=[
+            "strategy_ret",
+            "index_ret",
+            "excess_ret",
+            "holding_num",
+            "turnover",
+            "transaction_fee",
+        ],
+        query=[
+            ("pool", pool),
+            ("optimizer_index", optimizer_index),
+            ("benchmark_index", benchmark_index),
+        ],
+        is_cache=True,
+        **kwargs,
+    )
+
+    return backtest_df
+
+
 def load_strategy_info(
     pool: str = "all",
     optimizer_index: str = "000905.SH",
