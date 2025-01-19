@@ -135,9 +135,9 @@ export default {
 
       try {
         // 获取所有factor names
-        const allFactorNames = (Array.isArray(this.$route.query.factor_names)
+        const allFactorNames = this.$route.query.factor_names ? (Array.isArray(this.$route.query.factor_names)
           ? this.$route.query.factor_names.join(',')
-          : this.$route.query.factor_names);
+          : this.$route.query.factor_names) : "NoData";
 
         // 优先使用勾选的factor names，如果没有勾选则使用所有factor names
         const selectedFactorNames = this.$refs.factorStatsTable?.selectedFactors.join(',') || allFactorNames;
