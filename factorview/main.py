@@ -9,6 +9,8 @@ from .data_loader import (
     load_factor_perf,
     load_factor_stats,
     load_factor_stats_backtest,
+    load_factor_stats_group,
+    load_factor_stats_ic,
     load_strategy_factor_stats,
     load_strategy_info,
     load_strategy_perf,
@@ -79,6 +81,38 @@ async def get_factor_stats_backtest(request: Request):
     if "factor_names" in params and params["factor_names"]:
         params["factor_names"] = params["factor_names"].split(",")
     backtest_dict = load_factor_stats_backtest(**params)
+    return JSONResponse(
+        {
+            name: {
+                "values": clean_for_json(df),
+                "index": clean_for_json(df.index),
+            }
+            for name, df in backtest_dict.items()
+        }
+    )
+
+@app.get("/api/factor/stats/group")
+async def get_factor_stats_group(request: Request):
+    params = {k: v if v else None for k, v in request.query_params.items()}
+    if "factor_names" in params and params["factor_names"]:
+        params["factor_names"] = params["factor_names"].split(",")
+    backtest_dict = load_factor_stats_group(**params)
+    return JSONResponse(
+        {
+            name: {
+                "values": clean_for_json(df),
+                "index": clean_for_json(df.index),
+            }
+            for name, df in backtest_dict.items()
+        }
+    )
+
+@app.get("/api/factor/stats/ic")
+async def get_factor_stats_ic(request: Request):
+    params = {k: v if v else None for k, v in request.query_params.items()}
+    if "factor_names" in params and params["factor_names"]:
+        params["factor_names"] = params["factor_names"].split(",")
+    backtest_dict = load_factor_stats_ic(**params)
     return JSONResponse(
         {
             name: {

@@ -327,6 +327,81 @@ def load_factor_stats_backtest(
     return res
 
 
+def load_factor_stats_group(
+    factor_names: list[str] = None,
+    start_date: str = None,
+    end_date: str = None,
+    pool: str = "all",
+    optimizer_index: str = "000905.SH",
+    benchmark_index: str = "000905.SH",
+    **kwargs,
+):
+    factor_names = FactorManagerAll.get_factor_names(factor_names=factor_names)
+    res = {}
+    for factor_name in factor_names:
+        group_df = FactorManagerAll.get_perf_factor(
+            perf_type="group_pnl",
+            factor_names=factor_name,
+            start_date=start_date,
+            end_date=end_date,
+            index_col="date",
+            fields=[
+                "Group_01",
+                "Group_02",
+                "Group_03",
+                "Group_04",
+                "Group_05",
+                "Group_06",
+                "Group_07",
+                "Group_08",
+                "Group_09",
+                "Group_10",
+                "LS_Hedge",
+            ],
+            query=[("pool", pool)],
+            is_cache=True,
+            **kwargs,
+        )
+        res[factor_name] = group_df
+
+    return res
+
+
+def load_factor_stats_ic(
+    factor_names: list[str] = None,
+    start_date: str = None,
+    end_date: str = None,
+    pool: str = "all",
+    optimizer_index: str = "000905.SH",
+    benchmark_index: str = "000905.SH",
+    **kwargs,
+):
+    if start_date is not None:
+        start_date = pd.to_datetime(start_date)
+        _start = start_date - pd.DateOffset(days=400)
+    else:
+        _start = None
+        
+    factor_names = FactorManagerAll.get_factor_names(factor_names=factor_names)
+    res = {}
+    for factor_name in factor_names:
+        ic_df = FactorManagerAll.get_perf_factor(
+            perf_type="ic",
+            factor_names=factor_name,
+            start_date=_start,
+            end_date=end_date,
+            index_col="date",
+            fields="corr",
+            query=[("pool", pool)],
+            is_cache=True,
+            **kwargs,
+        )
+        ic_df["corr_roll"] = ic_df["corr"].rolling(252, min_periods=60).mean()
+        res[factor_name] = ic_df
+
+    return res
+
+
 def load_strategy_info(
     pool: str = "all",
     optimizer_index: str = "000905.SH",
