@@ -298,7 +298,7 @@ def load_factor_stats_backtest(
     **kwargs,
 ):
     factor_names = FactorManagerAll.get_factor_names(factor_names=factor_names)
-    res = {}
+    res: dict[str, pd.DataFrame] = {}
     for factor_name in factor_names:
         backtest_df = FactorManagerAll.get_perf_factor(
             perf_type="backtest_ret",
@@ -337,7 +337,7 @@ def load_factor_stats_group(
     **kwargs,
 ):
     factor_names = FactorManagerAll.get_factor_names(factor_names=factor_names)
-    res = {}
+    res: dict[str, pd.DataFrame] = {}
     for factor_name in factor_names:
         group_df = FactorManagerAll.get_perf_factor(
             perf_type="group_pnl",
@@ -381,9 +381,9 @@ def load_factor_stats_ic(
         _start = start_date - pd.DateOffset(days=400)
     else:
         _start = None
-        
+
     factor_names = FactorManagerAll.get_factor_names(factor_names=factor_names)
-    res = {}
+    res: dict[str, pd.DataFrame] = {}
     for factor_name in factor_names:
         ic_df = FactorManagerAll.get_perf_factor(
             perf_type="ic",

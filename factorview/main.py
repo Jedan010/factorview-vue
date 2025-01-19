@@ -96,14 +96,14 @@ async def get_factor_stats_group(request: Request):
     params = {k: v if v else None for k, v in request.query_params.items()}
     if "factor_names" in params and params["factor_names"]:
         params["factor_names"] = params["factor_names"].split(",")
-    backtest_dict = load_factor_stats_group(**params)
+    group_dict = load_factor_stats_group(**params)
     return JSONResponse(
         {
             name: {
                 "values": clean_for_json(df),
                 "index": clean_for_json(df.index),
             }
-            for name, df in backtest_dict.items()
+            for name, df in group_dict.items()
         }
     )
 
@@ -112,14 +112,14 @@ async def get_factor_stats_ic(request: Request):
     params = {k: v if v else None for k, v in request.query_params.items()}
     if "factor_names" in params and params["factor_names"]:
         params["factor_names"] = params["factor_names"].split(",")
-    backtest_dict = load_factor_stats_ic(**params)
+    ic_dict = load_factor_stats_ic(**params)
     return JSONResponse(
         {
             name: {
                 "values": clean_for_json(df),
                 "index": clean_for_json(df.index),
             }
-            for name, df in backtest_dict.items()
+            for name, df in ic_dict.items()
         }
     )
 
