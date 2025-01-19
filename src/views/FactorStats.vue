@@ -31,21 +31,36 @@
       </div>
 
 
-      <div class="backtest-toggle">
-        <button class="compare-btn" @click="toggleBacktest">
-          {{ showBacktest ? '隐藏回测收益对比' : '显示回测收益对比' }}
-        </button>
-
-        <div v-if="showBacktest && backtestLoading" class="loading-indicator">
-          <div class="loader"></div>
-          回测数据加载中...
+      <div class="button-controls">
+        <div class="compare-buttons">
+          <button class="compare-btn" @click="toggleBacktest">
+            {{ showBacktest ? '隐藏回测收益对比' : '显示回测收益对比' }}
+          </button>
+          <button class="compare-btn" @click="toggleGroup">
+            {{ showGroup ? '隐藏分组收益对比' : '显示分组收益对比' }}
+          </button>
         </div>
       </div>
 
+      <div v-if="showBacktest && backtestLoading" class="loading-indicator">
+        <div class="loader"></div>
+        回测数据加载中...
+      </div>
+
       <template v-if="showBacktest && !backtestLoading">
-        <FactorStatsBacktest v-if="backtestData.length > 0" :backtestData="backtestData" />
-        <FactorStatsBacktestTable v-if="backtestData.length > 0" :backtestData="backtestData"
+        <FactorStatsBacktest :backtestData="backtestData" />
+        <FactorStatsBacktestTable :backtestData="backtestData"
           :isDarkMode="isDarkMode" />
+      </template>
+
+      <div v-if="showGroup && groupLoading" class="loading-indicator">
+        <div class="loader"></div>
+        分组数据加载中...
+      </div>
+
+      <template v-if="showGroup && !groupLoading && Object.keys(groupData).length > 0">
+        <FactorStatsGroupPlot :groupData="groupData" />
+        <FactorStatsGroupTable :groupData="groupData" :isDarkMode="isDarkMode" />
       </template>
 
     </div>
@@ -53,19 +68,23 @@
 </template>
 
 <script>
-import { getFactorStats, getFactorStatsBacktest } from '@/api/factor';
+import { getFactorStats, getFactorStatsBacktest, getFactorStatsGroup } from '@/api/factor';
 import moment from 'moment';
 import FactorFilter from '@/components/Filter.vue';
 import FactorStatsTable from '@/components/FactorStatsTable.vue';
 import FactorStatsBacktest from '@/components/FactorStatsBacktest.vue';
 import FactorStatsBacktestTable from '@/components/FactorStatsBacktestTable.vue';
+import FactorStatsGroupPlot from '@/components/FactorStatsGroupPlot.vue';
+import FactorStatsGroupTable from '@/components/FactorStatsGroupTable.vue';
 
 export default {
   components: {
     FactorFilter,
     FactorStatsTable,
     FactorStatsBacktest,
-    FactorStatsBacktestTable
+    FactorStatsBacktestTable,
+    FactorStatsGroupPlot,
+    FactorStatsGroupTable
   },
   name: 'FactorStats',
   data() {
@@ -77,6 +96,9 @@ export default {
       error: null,
       isDarkMode: false,
       showBacktest: false,
+      groupData: {},
+      groupLoading: false,
+      showGroup: false,
       currentFilters: {
         pool: 'all',
         period: 'all',
@@ -126,6 +148,35 @@ export default {
         this.error = '因子统计数据加载失败，请稍后重试';
       } finally {
         this.isLoading = false;
+      }
+    },
+
+    async fetchGroupData() {
+      this.groupLoading = true;
+      this.error = null;
+
+      try {
+        const allFactorNames = this.$route.query.factor_names ? (Array.isArray(this.$route.query.factor_names)
+          ? this.$route.query.factor_names.join(',')
+          : this.$route.query.factor_names) : "NoData";
+
+        const selectedFactorNames = this.$refs.factorStatsTable?.selectedFactors.join(',') || allFactorNames;
+
+        const params = {
+          pool: this.currentFilters.pool,
+          benchmark_index: this.currentFilters.benchmark,
+          optimizer_index: this.currentFilters.optimizer,
+          start_date: this.currentFilters.startDate ? moment(this.currentFilters.startDate).format('YYYY-MM-DD') : null,
+          end_date: this.currentFilters.endDate ? moment(this.currentFilters.endDate).format('YYYY-MM-DD') : null,
+          factor_names: selectedFactorNames
+        };
+
+        this.groupData = await getFactorStatsGroup(params);
+      } catch (error) {
+        console.error('Error fetching group data:', error);
+        this.error = '分组数据加载失败，请稍后重试';
+      } finally {
+        this.groupLoading = false;
       }
     },
 
@@ -189,6 +240,21 @@ export default {
           this.backtestLoading = false;
         }
       }
+    },
+
+    async toggleGroup() {
+      this.showGroup = !this.showGroup;
+      if (this.showGroup) {
+        this.groupLoading = true;
+        try {
+          await this.fetchGroupData();
+        } catch (error) {
+          console.error('Error fetching group data:', error);
+          this.error = '分组数据加载失败，请稍后重试';
+        } finally {
+          this.groupLoading = false;
+        }
+      }
     }
   },
   async mounted() {
@@ -203,16 +269,25 @@ export default {
 <style scoped lang="scss">
 @use '../assets/styles/base-factor';
 
-.backtest-toggle {
+.button-controls {
+  display: flex;
+  justify-content: flex-start;
   margin: 20px 0;
-  text-align: center;
+  padding: 10px;
+  background: var(--background-color);
+  border-radius: 8px;
+}
+
+.compare-buttons {
+  display: flex;
+  gap: 1rem;
 }
 
 .compare-btn {
   padding: 0.75rem 1.5rem;
   background: linear-gradient(145deg, #3498db, #2980b9);
   color: white;
-  border: none;
+  border: 1px solid #e2e8f0;
   border-radius: 8px;
   transition: all 0.2s ease;
   display: flex;
@@ -220,15 +295,28 @@ export default {
   gap: 0.5rem;
   box-shadow: 0 2px 4px rgba(52, 152, 219, 0.2);
   cursor: pointer;
+  font-weight: 500;
 
   &:hover {
     transform: translateY(-1px);
     box-shadow: 0 4px 8px rgba(52, 152, 219, 0.3);
+    background: linear-gradient(145deg, #2980b9, #3498db);
   }
 
   &:active {
     transform: translateY(0);
     box-shadow: 0 2px 4px rgba(52, 152, 219, 0.2);
+  }
+}
+
+.dark-mode {
+  .compare-btn {
+    background: linear-gradient(145deg, #4a5568, #2d3748);
+    border-color: #444444;
+
+    &:hover {
+      background: linear-gradient(145deg, #556677, #3a4758);
+    }
   }
 }
 
