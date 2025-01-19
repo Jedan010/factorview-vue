@@ -17,6 +17,16 @@ export const getFactorStatsBacktest = async (params) => {
   return response.data
 }
 
+export const getFactorStatsGroup = async (params) => {
+  const response = await axios.get(`${API_BASE_URL}/api/factor/stats/group`, { params })
+  return response.data
+}
+
+export const getFactorStatsIc = async (params) => {
+  const response = await axios.get(`${API_BASE_URL}/api/factor/stats/ic`, { params })
+  return response.data
+}
+
 export const getFactorPerf = async (factorName, params) => {
   const response = await axios.get(`${API_BASE_URL}/api/factor/${factorName}`, { params })
   return response.data
