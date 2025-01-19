@@ -22,16 +22,20 @@
         {{ error }}
       </div>
 
-      <FactorStatsTable :factorData="response" />
-      
+      <div v-if="isLoading" class="loading-indicator">
+        <div class="loader"></div>
+        数据加载中
+      </div>
+      <div v-else>
+        <FactorStatsTable ref="factorStatsTable" :factorData="response" />
+      </div>
+
+
       <div class="backtest-toggle">
-        <button
-          class="compare-btn"
-          @click="toggleBacktest"
-        >
+        <button class="compare-btn" @click="toggleBacktest">
           {{ showBacktest ? '隐藏回测收益对比' : '显示回测收益对比' }}
         </button>
-        
+
         <div v-if="showBacktest && backtestLoading" class="loading-indicator">
           <div class="loader"></div>
           回测数据加载中...
@@ -40,7 +44,8 @@
 
       <template v-if="showBacktest && !backtestLoading">
         <FactorStatsBacktest v-if="backtestData.length > 0" :backtestData="backtestData" />
-        <FactorStatsBacktestTable v-if="backtestData.length > 0" :backtestData="backtestData" :isDarkMode="isDarkMode" />
+        <FactorStatsBacktestTable v-if="backtestData.length > 0" :backtestData="backtestData"
+          :isDarkMode="isDarkMode" />
       </template>
 
     </div>
@@ -71,6 +76,7 @@ export default {
       isLoading: false,
       error: null,
       isDarkMode: false,
+      showBacktest: false,
       currentFilters: {
         pool: 'all',
         period: 'all',
@@ -84,12 +90,15 @@ export default {
   computed: {},
   methods: {
 
-    handleFiltersChange(filters) {
+    async handleFiltersChange(filters) {
       this.currentFilters = filters;
-      this.fetchFactors();
+      await this.fetchFactorStats();
+      if (this.showBacktest) {
+        await this.fetchBacktestData();
+      }
     },
 
-    async fetchFactors(fetchBacktest = false) {
+    async fetchFactorStats() {
       this.isLoading = true;
       this.error = null;
 
@@ -112,39 +121,67 @@ export default {
         };
 
         this.response = await getFactorStats(params);
-        if (fetchBacktest || this.showBacktest) {
-          const backtestResponse = await getFactorStatsBacktest(params);
-          this.backtestData = Object.entries(backtestResponse).map(([name, data]) => {
-            const dates = data.index.map(date => moment(date).format('YYYY-MM-DD'));
-            return {
-              name,
-              values: data.values.excess_ret,
-              index: dates,
-              index_ret: data.values.index_ret,
-              holding_num: data.values.holding_num,
-              turnover: data.values.turnover,
-              transaction_fee: data.values.transaction_fee,
-            };
-          });
-        }
       } catch (error) {
-        console.error('Error fetching factors:', error);
-        this.error = '数据加载失败，请稍后重试';
+        console.error('Error fetching factor stats:', error);
+        this.error = '因子统计数据加载失败，请稍后重试';
       } finally {
         this.isLoading = false;
+      }
+    },
+
+    async fetchBacktestData() {
+      this.backtestLoading = true;
+      this.error = null;
+
+      try {
+        // 获取所有factor names
+        const allFactorNames = (Array.isArray(this.$route.query.factor_names)
+          ? this.$route.query.factor_names.join(',')
+          : this.$route.query.factor_names);
+
+        // 优先使用勾选的factor names，如果没有勾选则使用所有factor names
+        const selectedFactorNames = this.$refs.factorStatsTable?.selectedFactors.join(',') || allFactorNames;
+
+        const params = {
+          pool: this.currentFilters.pool,
+          benchmark_index: this.currentFilters.benchmark,
+          optimizer_index: this.currentFilters.optimizer,
+          start_date: this.currentFilters.startDate ? moment(this.currentFilters.startDate).format('YYYY-MM-DD') : null,
+          end_date: this.currentFilters.endDate ? moment(this.currentFilters.endDate).format('YYYY-MM-DD') : null,
+          factor_names: selectedFactorNames
+        };
+
+        const backtestResponse = await getFactorStatsBacktest(params);
+        this.backtestData = Object.entries(backtestResponse).map(([name, data]) => {
+          const dates = data.index.map(date => moment(date).format('YYYY-MM-DD'));
+          return {
+            name,
+            values: data.values.excess_ret,
+            index: dates,
+            index_ret: data.values.index_ret,
+            holding_num: data.values.holding_num,
+            turnover: data.values.turnover,
+            transaction_fee: data.values.transaction_fee,
+          };
+        });
+      } catch (error) {
+        console.error('Error fetching backtest data:', error);
+        this.error = '回测数据加载失败，请稍后重试';
+      } finally {
+        this.backtestLoading = false;
       }
     },
     toggleDarkMode() {
       this.isDarkMode = !this.isDarkMode;
       document.documentElement.classList.toggle('dark', this.isDarkMode);
     },
-    
+
     async toggleBacktest() {
       this.showBacktest = !this.showBacktest;
-      if (this.showBacktest && this.backtestData.length === 0) {
+      if (this.showBacktest) {
         this.backtestLoading = true;
         try {
-          await this.fetchFactors(true);
+          await this.fetchBacktestData();
         } catch (error) {
           console.error('Error fetching backtest data:', error);
           this.error = '回测数据加载失败，请稍后重试';
@@ -154,8 +191,11 @@ export default {
       }
     }
   },
-  mounted() {
-    this.fetchFactors();
+  async mounted() {
+    await this.fetchFactorStats();
+    if (this.showBacktest) {
+      await this.fetchBacktestData();
+    }
   }
 };
 </script>

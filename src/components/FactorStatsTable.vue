@@ -47,7 +47,7 @@ export default {
       required: true
     }
   },
-  setup(props) {
+  setup(props, { expose }) {
     const columns = [
       { key: 'select', label: '选择', width: '50px' },
       { key: 'name', label: '因子名称' },
@@ -138,6 +138,11 @@ export default {
     const formatPercent = (value) => {
       return value ? `${(value * 100).toFixed(2)}%` : '-'
     }
+
+    // 在setup函数最后暴露selectedFactors
+    expose({
+      selectedFactors
+    });
 
     return {
       columns,
