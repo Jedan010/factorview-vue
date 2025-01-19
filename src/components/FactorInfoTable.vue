@@ -58,7 +58,7 @@ export default {
       { key: 'developCode', label: '开发者代码' },
       { key: 'factorId', label: '因子ID' },
       { key: 'creationTime', label: '交易时间' },
-      { key: 'updateTime', label: '更新时间' },
+      { key: 'updateTime', label: '修改时间' },
       { key: 'insertTime', label: '插入时间' },
       { key: 'tableName', label: '表名' },
       { key: 'factorDesc', label: '因子描述' },
