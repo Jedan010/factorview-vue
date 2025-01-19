@@ -397,6 +397,8 @@ def load_factor_stats_ic(
             **kwargs,
         )
         ic_df["corr_roll"] = ic_df["corr"].rolling(252, min_periods=60).mean()
+        if start_date is not None:
+            ic_df = ic_df.loc[start_date:]
         res[factor_name] = ic_df
 
     return res

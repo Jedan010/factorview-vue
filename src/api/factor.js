@@ -22,7 +22,7 @@ export const getFactorStatsGroup = async (params) => {
   return response.data
 }
 
-export const getFactorStatsIc = async (params) => {
+export const getFactorStatsIC = async (params) => {
   const response = await axios.get(`${API_BASE_URL}/api/factor/stats/ic`, { params })
   return response.data
 }
