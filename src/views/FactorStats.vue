@@ -30,7 +30,6 @@
         <FactorStatsTable ref="factorStatsTable" :factorData="response" />
       </div>
 
-
       <div class="button-controls">
         <div class="compare-buttons">
           <button class="compare-btn" @click="toggleBacktest">
@@ -38,6 +37,9 @@
           </button>
           <button class="compare-btn" @click="toggleGroup">
             {{ showGroup ? '隐藏分组收益对比' : '显示分组收益对比' }}
+          </button>
+          <button class="compare-btn" @click="toggleIC">
+            {{ showIC ? '隐藏IC对比' : '显示IC对比' }}
           </button>
         </div>
       </div>
@@ -49,8 +51,7 @@
 
       <template v-if="showBacktest && !backtestLoading">
         <FactorStatsBacktest :backtestData="backtestData" />
-        <FactorStatsBacktestTable :backtestData="backtestData"
-          :isDarkMode="isDarkMode" />
+        <FactorStatsBacktestTable :backtestData="backtestData" :isDarkMode="isDarkMode" />
       </template>
 
       <div v-if="showGroup && groupLoading" class="loading-indicator">
@@ -63,12 +64,22 @@
         <FactorStatsGroupTable :groupData="groupData" :isDarkMode="isDarkMode" />
       </template>
 
+      <div v-if="showIC && icLoading" class="loading-indicator">
+        <div class="loader"></div>
+        IC数据加载中...
+      </div>
+
+      <template v-if="showIC && !icLoading && Object.keys(icData).length > 0">
+        <FactorStatsICPlot :icData="icData" :isDarkMode="isDarkMode" />
+        <FactorStatsICTable :icData="icData" :isDarkMode="isDarkMode" />
+      </template>
+
     </div>
   </div>
 </template>
 
 <script>
-import { getFactorStats, getFactorStatsBacktest, getFactorStatsGroup } from '@/api/factor';
+import { getFactorStats, getFactorStatsBacktest, getFactorStatsGroup, getFactorStatsIC } from '@/api/factor';
 import moment from 'moment';
 import FactorFilter from '@/components/Filter.vue';
 import FactorStatsTable from '@/components/FactorStatsTable.vue';
@@ -76,6 +87,8 @@ import FactorStatsBacktest from '@/components/FactorStatsBacktest.vue';
 import FactorStatsBacktestTable from '@/components/FactorStatsBacktestTable.vue';
 import FactorStatsGroupPlot from '@/components/FactorStatsGroupPlot.vue';
 import FactorStatsGroupTable from '@/components/FactorStatsGroupTable.vue';
+import FactorStatsICPlot from '@/components/FactorStatsICPlot.vue';
+import FactorStatsICTable from '@/components/FactorStatsICTable.vue';
 
 export default {
   components: {
@@ -84,7 +97,9 @@ export default {
     FactorStatsBacktest,
     FactorStatsBacktestTable,
     FactorStatsGroupPlot,
-    FactorStatsGroupTable
+    FactorStatsGroupTable,
+    FactorStatsICPlot,
+    FactorStatsICTable
   },
   name: 'FactorStats',
   data() {
@@ -99,6 +114,9 @@ export default {
       groupData: {},
       groupLoading: false,
       showGroup: false,
+      icData: {},
+      icLoading: false,
+      showIC: false,
       currentFilters: {
         pool: 'all',
         period: 'all',
@@ -109,14 +127,18 @@ export default {
       }
     };
   },
-  computed: {},
   methods: {
-
     async handleFiltersChange(filters) {
       this.currentFilters = filters;
       await this.fetchFactorStats();
       if (this.showBacktest) {
         await this.fetchBacktestData();
+      }
+      if (this.showGroup) {
+        await this.fetchGroupData();
+      }
+      if (this.showIC) {
+        await this.fetchICData();
       }
     },
 
@@ -136,7 +158,6 @@ export default {
           end_date: this.currentFilters.period === 'all'
             ? (this.currentFilters.endDate ? moment(this.currentFilters.endDate).format('YYYY-MM-DD') : null)
             : (dateRange.endDate ? moment(dateRange.endDate).format('YYYY-MM-DD') : null),
-
           factor_names: this.$route.query.factor_names ? (Array.isArray(this.$route.query.factor_names)
             ? this.$route.query.factor_names.join(',')
             : this.$route.query.factor_names) : null
@@ -148,35 +169,6 @@ export default {
         this.error = '因子统计数据加载失败，请稍后重试';
       } finally {
         this.isLoading = false;
-      }
-    },
-
-    async fetchGroupData() {
-      this.groupLoading = true;
-      this.error = null;
-
-      try {
-        const allFactorNames = this.$route.query.factor_names ? (Array.isArray(this.$route.query.factor_names)
-          ? this.$route.query.factor_names.join(',')
-          : this.$route.query.factor_names) : "NoData";
-
-        const selectedFactorNames = this.$refs.factorStatsTable?.selectedFactors.join(',') || allFactorNames;
-
-        const params = {
-          pool: this.currentFilters.pool,
-          benchmark_index: this.currentFilters.benchmark,
-          optimizer_index: this.currentFilters.optimizer,
-          start_date: this.currentFilters.startDate ? moment(this.currentFilters.startDate).format('YYYY-MM-DD') : null,
-          end_date: this.currentFilters.endDate ? moment(this.currentFilters.endDate).format('YYYY-MM-DD') : null,
-          factor_names: selectedFactorNames
-        };
-
-        this.groupData = await getFactorStatsGroup(params);
-      } catch (error) {
-        console.error('Error fetching group data:', error);
-        this.error = '分组数据加载失败，请稍后重试';
-      } finally {
-        this.groupLoading = false;
       }
     },
 
@@ -222,6 +214,65 @@ export default {
         this.backtestLoading = false;
       }
     },
+
+
+    async fetchGroupData() {
+      this.groupLoading = true;
+      this.error = null;
+
+      try {
+        const allFactorNames = this.$route.query.factor_names ? (Array.isArray(this.$route.query.factor_names)
+          ? this.$route.query.factor_names.join(',')
+          : this.$route.query.factor_names) : "NoData";
+
+        const selectedFactorNames = this.$refs.factorStatsTable?.selectedFactors.join(',') || allFactorNames;
+
+        const params = {
+          pool: this.currentFilters.pool,
+          benchmark_index: this.currentFilters.benchmark,
+          optimizer_index: this.currentFilters.optimizer,
+          start_date: this.currentFilters.startDate ? moment(this.currentFilters.startDate).format('YYYY-MM-DD') : null,
+          end_date: this.currentFilters.endDate ? moment(this.currentFilters.endDate).format('YYYY-MM-DD') : null,
+          factor_names: selectedFactorNames
+        };
+
+        this.groupData = await getFactorStatsGroup(params);
+      } catch (error) {
+        console.error('Error fetching group data:', error);
+        this.error = '分组数据加载失败，请稍后重试';
+      } finally {
+        this.groupLoading = false;
+      }
+    },
+    async fetchICData() {
+      this.icLoading = true;
+      this.error = null;
+
+      try {
+        const allFactorNames = this.$route.query.factor_names ? (Array.isArray(this.$route.query.factor_names)
+          ? this.$route.query.factor_names.join(',')
+          : this.$route.query.factor_names) : "NoData";
+
+        const selectedFactorNames = this.$refs.factorStatsTable?.selectedFactors.join(',') || allFactorNames;
+
+        const params = {
+          pool: this.currentFilters.pool,
+          benchmark_index: this.currentFilters.benchmark,
+          optimizer_index: this.currentFilters.optimizer,
+          start_date: this.currentFilters.startDate ? moment(this.currentFilters.startDate).format('YYYY-MM-DD') : null,
+          end_date: this.currentFilters.endDate ? moment(this.currentFilters.endDate).format('YYYY-MM-DD') : null,
+          factor_names: selectedFactorNames
+        };
+
+        this.icData = await getFactorStatsIC(params);
+      } catch (error) {
+        console.error('Error fetching IC data:', error);
+        this.error = 'IC数据加载失败，请稍后重试';
+      } finally {
+        this.icLoading = false;
+      }
+    },
+
     toggleDarkMode() {
       this.isDarkMode = !this.isDarkMode;
       document.documentElement.classList.toggle('dark', this.isDarkMode);
@@ -255,12 +306,33 @@ export default {
           this.groupLoading = false;
         }
       }
-    }
+    },
+    async toggleIC() {
+      this.showIC = !this.showIC;
+      if (this.showIC) {
+        this.icLoading = true;
+        try {
+          await this.fetchICData();
+        } catch (error) {
+          console.error('Error fetching IC data:', error);
+          this.error = 'IC数据加载失败，请稍后重试';
+        } finally {
+          this.icLoading = false;
+        }
+      }
+    },
+
   },
   async mounted() {
     await this.fetchFactorStats();
     if (this.showBacktest) {
       await this.fetchBacktestData();
+    }
+    if (this.showGroup) {
+      await this.fetchGroupData();
+    }
+    if (this.showIC) {
+      await this.fetchICData();
     }
   }
 };
