@@ -132,7 +132,7 @@ async def get_factor_stats_ic(request: Request):
     )
 
 
-@app.get("/api/factor/stats/update")
+@app.get("/api/factor/update")
 async def get_factor_update(request: Request):
     """取因子更新信息"""
     params = {k: v if v else None for k, v in request.query_params.items()}
