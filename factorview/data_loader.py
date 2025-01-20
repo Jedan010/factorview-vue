@@ -1,5 +1,5 @@
 import pandas as pd
-from quantfactor import FactorManagerAll, p
+from quantfactor import FactorManagerAll, p, stock_calendar
 
 
 def load_factor_info(
@@ -417,6 +417,10 @@ def load_factor_update_info(
     **kwargs,
 ):
     """取因子更新信息"""
+    if start_date is None:
+        start_date = "2018-01-01"
+    if end_date is None:
+        end_date = stock_calendar.get_shift_date("today", -1)
     factor_update_info = FactorManagerAll.get_date_status_factor(
         factor_names=factor_names,
         start_date=start_date,
