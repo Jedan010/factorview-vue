@@ -75,7 +75,7 @@ async def get_factor_info(
 
 @app.get("/api/factor/stats")
 async def get_factor_stats(
-    factor_names: list[str] = Query(None),
+    factor_names: list[str] = Query(default=None, alias="factor_names[]"),
     start_date: str = Query(None),
     end_date: str = Query(None),
     pool: str = Query("all"),
@@ -83,7 +83,6 @@ async def get_factor_stats(
     benchmark_index: str = Query("000905.SH"),
 ):
     """取因子统计信息"""
-
     factor_stats = load_factor_stats(
         factor_names=factor_names,
         start_date=start_date,
@@ -108,7 +107,7 @@ async def get_factor_stats(
 
 @app.get("/api/factor/stats/backtest")
 async def get_factor_stats_backtest(
-    factor_names: list[str] = Query(None),
+    factor_names: list[str] = Query(default=None, alias="factor_names[]"),
     start_date: str = Query(None),
     end_date: str = Query(None),
     pool: str = Query("all"),
@@ -138,7 +137,7 @@ async def get_factor_stats_backtest(
 
 @app.get("/api/factor/stats/group")
 async def get_factor_stats_group(
-    factor_names: list[str] = Query(None),
+    factor_names: list[str] = Query(default=None, alias="factor_names[]"),
     start_date: str = Query(None),
     end_date: str = Query(None),
     pool: str = Query("all"),
@@ -168,7 +167,7 @@ async def get_factor_stats_group(
 
 @app.get("/api/factor/stats/ic")
 async def get_factor_stats_ic(
-    factor_names: list[str] = Query(None),
+    factor_names: list[str] = Query(default=None, alias="factor_names[]"),
     start_date: str = Query(None),
     end_date: str = Query(None),
     pool: str = Query("all"),
@@ -198,7 +197,7 @@ async def get_factor_stats_ic(
 
 @app.get("/api/factor/update")
 async def get_factor_update(
-    factor_names: list[str] = Query(None),
+    factor_names: list[str] = Query(default=None, alias="factor_names[]"),
     start_date: str = Query(None),
     end_date: str = Query(None),
 ):
