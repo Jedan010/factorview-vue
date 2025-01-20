@@ -22,6 +22,11 @@ const routes = [
     component: () => import('@/views/FactorPerformance.vue')
   },
   {
+    path: '/factor/update',
+    name: 'FactorUpdateInfo',
+    component: () => import('@/views/FactorUpdateInfo.vue')
+  },
+  {
     path: '/strategy',
     name: 'StrategyInfo',
     component: () => import('@/views/StrategyInfo.vue')

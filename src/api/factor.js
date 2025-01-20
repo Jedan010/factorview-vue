@@ -31,3 +31,7 @@ export const getFactorPerf = async (factorName, params) => {
   const response = await axios.get(`${API_BASE_URL}/api/factor/${factorName}`, { params })
   return response.data
 }
+export const getFactorUpdate = async (params) => {
+  const response = await axios.get(`${API_BASE_URL}/api/factor/update`, { params })
+  return response.data
+}
