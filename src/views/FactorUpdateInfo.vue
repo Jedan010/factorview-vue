@@ -87,7 +87,7 @@ async function fetchData() {
       end_date: filters.value.period === 'all'
         ? (filters.value.endDate ? moment(filters.value.endDate).format('YYYY-MM-DD') : null)
         : (dateRange.endDate ? moment(dateRange.endDate).format('YYYY-MM-DD') : null),
-      factor_names: factorNames.value.join(',')
+      factor_names: factorNames.value
     }
 
     const data = await getFactorUpdate(params)

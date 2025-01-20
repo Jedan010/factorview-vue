@@ -158,9 +158,7 @@ export default {
           end_date: this.currentFilters.period === 'all'
             ? (this.currentFilters.endDate ? moment(this.currentFilters.endDate).format('YYYY-MM-DD') : null)
             : (dateRange.endDate ? moment(dateRange.endDate).format('YYYY-MM-DD') : null),
-          factor_names: this.$route.query.factor_names ? (Array.isArray(this.$route.query.factor_names)
-            ? this.$route.query.factor_names.join(',')
-            : this.$route.query.factor_names) : null
+          factor_names: this.$route.query.factor_names
         };
 
         this.response = await getFactorStats(params);
@@ -178,12 +176,11 @@ export default {
 
       try {
         // 获取所有factor names
-        const allFactorNames = this.$route.query.factor_names ? (Array.isArray(this.$route.query.factor_names)
-          ? this.$route.query.factor_names.join(',')
-          : this.$route.query.factor_names) : "NoData";
+        const allFactorNames = this.$route.query.factor_names;
 
         // 优先使用勾选的factor names，如果没有勾选则使用所有factor names
-        const selectedFactorNames = this.$refs.factorStatsTable?.selectedFactors.join(',') || allFactorNames;
+        const selectedFactorNames = this.$refs.factorStatsTable?.selectedFactors.length > 0 ?
+          this.$refs.factorStatsTable?.selectedFactors : allFactorNames;
 
         const params = {
           pool: this.currentFilters.pool,
@@ -221,19 +218,14 @@ export default {
       this.error = null;
 
       try {
-        const allFactorNames = this.$route.query.factor_names ? (Array.isArray(this.$route.query.factor_names)
-          ? this.$route.query.factor_names.join(',')
-          : this.$route.query.factor_names) : "NoData";
-
-        const selectedFactorNames = this.$refs.factorStatsTable?.selectedFactors.join(',') || allFactorNames;
-
         const params = {
           pool: this.currentFilters.pool,
           benchmark_index: this.currentFilters.benchmark,
           optimizer_index: this.currentFilters.optimizer,
           start_date: this.currentFilters.startDate ? moment(this.currentFilters.startDate).format('YYYY-MM-DD') : null,
           end_date: this.currentFilters.endDate ? moment(this.currentFilters.endDate).format('YYYY-MM-DD') : null,
-          factor_names: selectedFactorNames
+          factor_names: this.$refs.factorStatsTable?.selectedFactors.length > 0 ?
+            this.$refs.factorStatsTable?.selectedFactors : this.$route.query.factor_names || ["NoData"]
         };
 
         this.groupData = await getFactorStatsGroup(params);
@@ -249,19 +241,14 @@ export default {
       this.error = null;
 
       try {
-        const allFactorNames = this.$route.query.factor_names ? (Array.isArray(this.$route.query.factor_names)
-          ? this.$route.query.factor_names.join(',')
-          : this.$route.query.factor_names) : "NoData";
-
-        const selectedFactorNames = this.$refs.factorStatsTable?.selectedFactors.join(',') || allFactorNames;
-
         const params = {
           pool: this.currentFilters.pool,
           benchmark_index: this.currentFilters.benchmark,
           optimizer_index: this.currentFilters.optimizer,
           start_date: this.currentFilters.startDate ? moment(this.currentFilters.startDate).format('YYYY-MM-DD') : null,
           end_date: this.currentFilters.endDate ? moment(this.currentFilters.endDate).format('YYYY-MM-DD') : null,
-          factor_names: selectedFactorNames
+          factor_names: this.$refs.factorStatsTable?.selectedFactors.length > 0 ?
+            this.$refs.factorStatsTable?.selectedFactors : this.$route.query.factor_names || ["NoData"]
         };
 
         this.icData = await getFactorStatsIC(params);
