@@ -13,7 +13,7 @@ def load_factor_info(
     query: list[str] = None,
     **kwargs,
 ):
-    """取得因子信息"""
+    """取因子基本信息"""
 
     if query is None:
         query = []
@@ -38,7 +38,8 @@ def load_factor_info(
     factor_info_df = FactorManagerAll.get_info_factor(
         factor_names=factor_names,
         query=query,
-        is_cache=True,  # **kwargs
+        is_cache=True,
+        **kwargs,
     )
 
     return factor_info_df
@@ -53,6 +54,7 @@ def load_factor_stats(
     benchmark_index: str = "000905.SH",
     **kwargs,
 ):
+    """取因子统计信息"""
     factor_info_df = FactorManagerAll.get_info_factor(
         factor_names=factor_names,
         query=[("status not in  ('tmp')")],
@@ -220,6 +222,7 @@ def load_factor_perf(
     benchmark_index: str = "000905.SH",
     **kwargs,
 ):
+    """取单个因子表现"""
     if start_date is not None:
         start_date = pd.to_datetime(start_date)
         _start = start_date - pd.DateOffset(days=400)
@@ -297,6 +300,7 @@ def load_factor_stats_backtest(
     benchmark_index: str = "000905.SH",
     **kwargs,
 ):
+    """取因子回测统计信息"""
     factor_names = FactorManagerAll.get_factor_names(factor_names=factor_names)
     res: dict[str, pd.DataFrame] = {}
     for factor_name in factor_names:
@@ -336,6 +340,7 @@ def load_factor_stats_group(
     benchmark_index: str = "000905.SH",
     **kwargs,
 ):
+    """取因子分组统计信息"""
     factor_names = FactorManagerAll.get_factor_names(factor_names=factor_names)
     res: dict[str, pd.DataFrame] = {}
     for factor_name in factor_names:
@@ -376,6 +381,7 @@ def load_factor_stats_ic(
     benchmark_index: str = "000905.SH",
     **kwargs,
 ):
+    """取因子IC统计信息"""
     if start_date is not None:
         start_date = pd.to_datetime(start_date)
         _start = start_date - pd.DateOffset(days=400)
@@ -404,6 +410,23 @@ def load_factor_stats_ic(
     return res
 
 
+def load_factor_update_info(
+    factor_names: list[str] = None,
+    start_date: str = None,
+    end_date: str = None,
+    **kwargs,
+):
+    """取因子更新信息"""
+    factor_update_info = FactorManagerAll.get_date_status_factor(
+        factor_names=factor_names,
+        start_date=start_date,
+        end_date=end_date,
+        **kwargs,
+    )
+
+    return factor_update_info
+
+
 def load_strategy_info(
     pool: str = "all",
     optimizer_index: str = "000905.SH",
@@ -428,6 +451,7 @@ def load_strategy_perf(
     benchmark_index: str = "000905.SH",
     **kwargs,
 ):
+    """取单个策略表现"""
     backtest_df = FactorManagerAll.get_perf_factor(
         perf_type="backtest_ret",
         factor_names=strategy_name,
@@ -474,6 +498,7 @@ def load_strategy_factor_stats(
     benchmark_index: str = "000905.SH",
     **kwargs,
 ):
+    """取策略统计信息"""
     strategy_info = FactorManagerAll.get_info_strategy(strategy_names=strategy_name)
     if strategy_info.empty:
         raise ValueError(f"策略 {strategy_name} 不存在")
