@@ -1,6 +1,6 @@
 import numpy as np
 import pandas as pd
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, Query
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
@@ -44,9 +44,25 @@ def clean_for_json(data):
 
 
 @app.get("/api/factor")
-async def get_factor_info(request: Request):
+async def get_factor_info(
+    factor_names: list[str] = Query(None),
+    table_names: list[str] = Query(None),
+    class_names: list[str] = Query(None),
+    status: list[str] = Query(None),
+    develop_codes: list[str] = Query(None),
+    factor_ids: list[str] = Query(None),
+    creation_time: list[str] = Query(None),
+):
     """取因子基本信息"""
-    factor_info = load_factor_info(**request.query_params)
+    factor_info = load_factor_info(
+        factor_names=factor_names,
+        table_names=table_names,
+        class_names=class_names,
+        status=status,
+        develop_codes=develop_codes,
+        factor_ids=factor_ids,
+        creation_time=creation_time,
+    )
     return JSONResponse(
         {
             "factor_info": {
@@ -58,12 +74,24 @@ async def get_factor_info(request: Request):
 
 
 @app.get("/api/factor/stats")
-async def get_factor_stats(request: Request):
+async def get_factor_stats(
+    factor_names: list[str] = Query(None),
+    start_date: str = Query(None),
+    end_date: str = Query(None),
+    pool: str = Query("all"),
+    optimizer_index: str = Query("000905.SH"),
+    benchmark_index: str = Query("000905.SH"),
+):
     """取因子统计信息"""
-    params = {k: v if v else None for k, v in request.query_params.items()}
-    if "factor_names" in params and params["factor_names"]:
-        params["factor_names"] = params["factor_names"].split(",")
-    factor_stats = load_factor_stats(**params)
+
+    factor_stats = load_factor_stats(
+        factor_names=factor_names,
+        start_date=start_date,
+        end_date=end_date,
+        pool=pool,
+        optimizer_index=optimizer_index,
+        benchmark_index=benchmark_index,
+    )
     return JSONResponse(
         {
             name: {
@@ -79,12 +107,24 @@ async def get_factor_stats(request: Request):
 
 
 @app.get("/api/factor/stats/backtest")
-async def get_factor_stats_backtest(request: Request):
+async def get_factor_stats_backtest(
+    factor_names: list[str] = Query(None),
+    start_date: str = Query(None),
+    end_date: str = Query(None),
+    pool: str = Query("all"),
+    optimizer_index: str = Query("000905.SH"),
+    benchmark_index: str = Query("000905.SH"),
+):
     """取因子回测统计信息"""
-    params = {k: v if v else None for k, v in request.query_params.items()}
-    if "factor_names" in params and params["factor_names"]:
-        params["factor_names"] = params["factor_names"].split(",")
-    backtest_dict = load_factor_stats_backtest(**params)
+
+    backtest_dict = load_factor_stats_backtest(
+        factor_names=factor_names,
+        start_date=start_date,
+        end_date=end_date,
+        pool=pool,
+        optimizer_index=optimizer_index,
+        benchmark_index=benchmark_index,
+    )
     return JSONResponse(
         {
             name: {
@@ -97,12 +137,24 @@ async def get_factor_stats_backtest(request: Request):
 
 
 @app.get("/api/factor/stats/group")
-async def get_factor_stats_group(request: Request):
+async def get_factor_stats_group(
+    factor_names: list[str] = Query(None),
+    start_date: str = Query(None),
+    end_date: str = Query(None),
+    pool: str = Query("all"),
+    optimizer_index: str = Query("000905.SH"),
+    benchmark_index: str = Query("000905.SH"),
+):
     """取因子分组统计信息"""
-    params = {k: v if v else None for k, v in request.query_params.items()}
-    if "factor_names" in params and params["factor_names"]:
-        params["factor_names"] = params["factor_names"].split(",")
-    group_dict = load_factor_stats_group(**params)
+
+    group_dict = load_factor_stats_group(
+        factor_names=factor_names,
+        start_date=start_date,
+        end_date=end_date,
+        pool=pool,
+        optimizer_index=optimizer_index,
+        benchmark_index=benchmark_index,
+    )
     return JSONResponse(
         {
             name: {
@@ -115,12 +167,24 @@ async def get_factor_stats_group(request: Request):
 
 
 @app.get("/api/factor/stats/ic")
-async def get_factor_stats_ic(request: Request):
+async def get_factor_stats_ic(
+    factor_names: list[str] = Query(None),
+    start_date: str = Query(None),
+    end_date: str = Query(None),
+    pool: str = Query("all"),
+    optimizer_index: str = Query("000905.SH"),
+    benchmark_index: str = Query("000905.SH"),
+):
     """取因子IC统计信息"""
-    params = {k: v if v else None for k, v in request.query_params.items()}
-    if "factor_names" in params and params["factor_names"]:
-        params["factor_names"] = params["factor_names"].split(",")
-    ic_dict = load_factor_stats_ic(**params)
+
+    ic_dict = load_factor_stats_ic(
+        factor_names=factor_names,
+        start_date=start_date,
+        end_date=end_date,
+        pool=pool,
+        optimizer_index=optimizer_index,
+        benchmark_index=benchmark_index,
+    )
     return JSONResponse(
         {
             name: {
@@ -133,12 +197,18 @@ async def get_factor_stats_ic(request: Request):
 
 
 @app.get("/api/factor/update")
-async def get_factor_update(request: Request):
+async def get_factor_update(
+    factor_names: list[str] = Query(None),
+    start_date: str = Query(None),
+    end_date: str = Query(None),
+):
     """取因子更新信息"""
-    params = {k: v if v else None for k, v in request.query_params.items()}
-    if "factor_names" in params and params["factor_names"]:
-        params["factor_names"] = params["factor_names"].split(",")
-    factor_update_info = load_factor_update_info(**params)
+
+    factor_update_info = load_factor_update_info(
+        factor_names=factor_names,
+        start_date=start_date,
+        end_date=end_date,
+    )
     return JSONResponse(
         {
             name: clean_for_json(factor_update_info.loc[name].to_dict())
@@ -148,9 +218,23 @@ async def get_factor_update(request: Request):
 
 
 @app.get("/api/factor/{factor_name}")
-async def get_factor_perf(factor_name: str, request: Request):
+async def get_factor_perf(
+    factor_name: str,
+    start_date: str = Query(None),
+    end_date: str = Query(None),
+    pool: str = Query("all"),
+    optimizer_index: str = Query("000905.SH"),
+    benchmark_index: str = Query("000905.SH"),
+):
     """取单个因子的表现"""
-    factor_perf = load_factor_perf(factor_name, **request.query_params)
+    factor_perf = load_factor_perf(
+        factor_name=factor_name,
+        start_date=start_date,
+        end_date=end_date,
+        pool=pool,
+        optimizer_index=optimizer_index,
+        benchmark_index=benchmark_index,
+    )
     return JSONResponse(
         {
             name: {
@@ -166,9 +250,17 @@ async def get_factor_perf(factor_name: str, request: Request):
 
 
 @app.get("/api/strategy")
-async def get_strategy_info(request: Request):
+async def get_strategy_info(
+    pool: str = Query("all"),
+    optimizer_index: str = Query("000905.SH"),
+    benchmark_index: str = Query("000905.SH"),
+):
     """取策略基本信息"""
-    strategy_info = load_strategy_info(**request.query_params)
+    strategy_info = load_strategy_info(
+        pool=pool,
+        optimizer_index=optimizer_index,
+        benchmark_index=benchmark_index,
+    )
     return JSONResponse(
         {
             "strategy_info": {
@@ -180,9 +272,23 @@ async def get_strategy_info(request: Request):
 
 
 @app.get("/api/strategy/{strategy_name}")
-async def get_strategy_perf(strategy_name: str, request: Request):
+async def get_strategy_perf(
+    strategy_name: str,
+    start_date: str = Query(None),
+    end_date: str = Query(None),
+    pool: str = Query("all"),
+    optimizer_index: str = Query("000905.SH"),
+    benchmark_index: str = Query("000905.SH"),
+):
     """取单个策略的表现"""
-    (backtest_df,) = load_strategy_perf(strategy_name, **request.query_params)
+    (backtest_df,) = load_strategy_perf(
+        strategy_name=strategy_name,
+        start_date=start_date,
+        end_date=end_date,
+        pool=pool,
+        optimizer_index=optimizer_index,
+        benchmark_index=benchmark_index,
+    )
     return JSONResponse(
         {
             "backtest_ret": {
@@ -194,9 +300,23 @@ async def get_strategy_perf(strategy_name: str, request: Request):
 
 
 @app.get("/api/strategy/{strategy_name}/factors")
-async def get_strategy_factors(strategy_name: str, request: Request):
+async def get_strategy_factors(
+    strategy_name: str,
+    start_date: str = Query(None),
+    end_date: str = Query(None),
+    pool: str = Query("all"),
+    optimizer_index: str = Query("000905.SH"),
+    benchmark_index: str = Query("000905.SH"),
+):
     """取策略的统计表现"""
-    factor_stats = load_strategy_factor_stats(strategy_name, **request.query_params)
+    factor_stats = load_strategy_factor_stats(
+        strategy_name=strategy_name,
+        start_date=start_date,
+        end_date=end_date,
+        pool=pool,
+        optimizer_index=optimizer_index,
+        benchmark_index=benchmark_index,
+    )
     return JSONResponse(
         {
             name: {

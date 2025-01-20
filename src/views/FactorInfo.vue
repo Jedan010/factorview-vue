@@ -120,10 +120,10 @@ export default {
       try {
         const params = {
           class_names: this.filters.classNames,
-          statuses: this.filters.status,
+          status: this.filters.status,
           develop_codes: this.filters.developCodes,
           factor_ids: this.filters.factorIds,
-          creation_times: this.filters.creationTime
+          creation_time: this.filters.creationTime
         };
 
         const data = await getFactorInfo(params);
