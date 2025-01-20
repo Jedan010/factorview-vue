@@ -107,7 +107,7 @@ async function fetchData() {
 <template>
   <div class="factor-update-info" :class="{ 'dark-mode': isDarkMode }">
     <div class="header">
-      <h1>因子更新时间统计</h1>
+      <h1>因子更新日期统计</h1>
       <div class="header-controls">
         <button class="theme-toggle" @click="toggleDarkMode">
           <span class="theme-icon">
