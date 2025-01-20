@@ -21,19 +21,19 @@ def load_factor_info(
         query = [query]
 
     if table_names is not None:
-        query.append("table_name", table_names)
+        query.append(("table_name", table_names))
     if class_names is not None:
-        query.append("class_name", class_names)
+        query.append(("class_name", class_names))
     if status is not None:
-        query.append("status", status)
+        query.append(("status", status))
     else:
         query.append("status not in  ('tmp')")
     if develop_codes is not None:
-        query.append("develop_code", develop_codes)
+        query.append(("develop_code", develop_codes))
     if factor_ids is not None:
-        query.append("factor_id", factor_ids)
+        query.append(("factor_id", factor_ids))
     if creation_time is not None:
-        query.append("creation_time", creation_time)
+        query.append(("creation_time", creation_time))
 
     factor_info_df = FactorManagerAll.get_info_factor(
         factor_names=factor_names,
