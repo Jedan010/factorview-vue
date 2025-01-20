@@ -520,7 +520,6 @@ def load_strategy_factor_stats(
         pool=pool,
         optimizer_index=optimizer_index,
         benchmark_index=benchmark_index,
-        is_cache=True,
         **kwargs,
     )
     return factor_stats_df
