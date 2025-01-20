@@ -19,11 +19,12 @@ const icStats = computed(() => {
   const icValues = props.icData.values.map(v => v[0])
   const mean = icValues.reduce((a, b) => a + b, 0) / icValues.length
   const std = Math.sqrt(icValues.reduce((a, b) => a + (b - mean) ** 2, 0) / icValues.length)
+  const tValue = (mean / (std / Math.sqrt(icValues.length))).toFixed(4)
   
   return {
-    mean: mean.toFixed(4),
-    std: std.toFixed(4),
-    ir: (mean / std).toFixed(4),
+    ic: mean.toFixed(4),
+    icir: (mean / std).toFixed(4),
+    tValue: tValue,
     positiveRatio: ((icValues.filter(v => v > 0).length / icValues.length) * 100).toFixed(2) + '%'
   }
 })
@@ -34,22 +35,22 @@ const icStats = computed(() => {
    
     <div class="stats-grid">
       <div class="stat-item">
-        <div class="stat-label">均值</div>
-        <div class="stat-value">{{ icStats?.mean }}</div>
+        <div class="stat-label">IC</div>
+        <div class="stat-value">{{ icStats?.ic }}</div>
       </div>
       
       <div class="stat-item">
-        <div class="stat-label">标准差</div>
-        <div class="stat-value">{{ icStats?.std }}</div>
+        <div class="stat-label">ICIR</div>
+        <div class="stat-value">{{ icStats?.icir }}</div>
       </div>
       
       <div class="stat-item">
-        <div class="stat-label">信息比率</div>
-        <div class="stat-value">{{ icStats?.ir }}</div>
+        <div class="stat-label">T-Value</div>
+        <div class="stat-value">{{ icStats?.tValue }}</div>
       </div>
       
       <div class="stat-item">
-        <div class="stat-label">正IC比例</div>
+        <div class="stat-label">正IC比率</div>
         <div class="stat-value">{{ icStats?.positiveRatio }}</div>
       </div>
     </div>

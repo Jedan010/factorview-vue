@@ -40,6 +40,16 @@
       }" class="stats-btn">
         因子表现统计
       </router-link>
+      <router-link :to="{
+        path: '/factor/update',
+        query: {
+          factor_names: Array.isArray(factorTableRef?.selectedFactors)
+            ? factorTableRef.selectedFactors
+            : [factorTableRef?.selectedFactors]
+        }
+      }" class="stats-btn">
+        因子更新状态
+      </router-link>
     </div>
 
     <div class="content">
@@ -110,10 +120,10 @@ export default {
       try {
         const params = {
           class_names: this.filters.classNames,
-          statuses: this.filters.status,
+          status: this.filters.status,
           develop_codes: this.filters.developCodes,
           factor_ids: this.filters.factorIds,
-          creation_times: this.filters.creationTime
+          creation_time: this.filters.creationTime
         };
 
         const data = await getFactorInfo(params);
@@ -202,6 +212,7 @@ export default {
       text-decoration: none;
       border-radius: 8px;
       transition: all 0.2s ease;
+      margin-right: 1rem;
 
       &:hover {
         background: #2980b9;

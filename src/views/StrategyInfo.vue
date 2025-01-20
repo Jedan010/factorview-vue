@@ -69,7 +69,7 @@
               <th @click="sortTable('pool')">股票池</th>
               <th @click="sortTable('status')">状态</th>
               <th @click="sortTable('insertTime')">插入时间</th>
-              <th @click="sortTable('updateTime')">更新时间</th>
+              <th @click="sortTable('updateTime')">修改时间</th>
             </tr>
           </thead>
           <tbody>

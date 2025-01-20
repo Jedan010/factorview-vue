@@ -28,7 +28,14 @@ function initChart() {
       left: 'center'
     },
     tooltip: {
-      trigger: 'axis'
+      trigger: 'axis',
+      formatter: function (params) {
+        let res = params[0].name + '<br>';
+        params.forEach(function (item) {
+          res += item.marker + ' ' + item.seriesName + ': ' + item.value.toFixed(4) + '<br>';
+        });
+        return res;
+      }
     },
     xAxis: {
       type: 'category',

@@ -19,5 +19,17 @@ export default defineConfig({
     host: '0.0.0.0',
     port: 5173,
     disableHostCheck: true,
+    proxy: {
+      '/api': {
+        target: 'http://192.169.88.209:5000',
+        changeOrigin: true,
+        rewrite: path => path.replace(/^\/api/, ''),
+      },
+      '/local-api': {
+        target: 'http://127.0.0.1:5000',
+        changeOrigin: true,
+        rewrite: path => path.replace(/^\/local-api/, ''),
+      },
+    },
   },
 })

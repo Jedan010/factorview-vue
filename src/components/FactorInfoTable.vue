@@ -29,7 +29,9 @@
           <td>{{ factor.updateTime }}</td>
           <td>{{ factor.insertTime }}</td>
           <td>{{ factor.tableName }}</td>
-          <td>{{ factor.factorDesc }}</td>
+          <td class="factor-desc" :title="factor.factorDesc">
+            <span class="truncated">{{ factor.factorDesc }}</span>
+          </td>
         </tr>
       </tbody>
     </table>
@@ -58,7 +60,7 @@ export default {
       { key: 'developCode', label: '开发者代码' },
       { key: 'factorId', label: '因子ID' },
       { key: 'creationTime', label: '交易时间' },
-      { key: 'updateTime', label: '更新时间' },
+      { key: 'updateTime', label: '修改时间' },
       { key: 'insertTime', label: '插入时间' },
       { key: 'tableName', label: '表名' },
       { key: 'factorDesc', label: '因子描述' },
@@ -211,5 +213,29 @@ export default {
 
 .data-table table tr td:nth-child(2) {
   text-align: left !important;
+}
+
+.factor-desc {
+  max-width: 200px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  position: relative;
+  cursor: pointer;
+}
+
+.factor-desc:hover::after {
+  content: attr(title);
+  position: absolute;
+  left: 0;
+  top: 100%;
+  background: #333;
+  color: #fff;
+  padding: 4px 8px;
+  border-radius: 4px;
+  white-space: normal;
+  z-index: 1000;
+  min-width: 300px;
+  max-width: 500px;
 }
 </style>
