@@ -17,7 +17,7 @@ function initChart() {
 
   const option = {
     title: {
-      text: '多因子超额收益',
+      text: '超额收益',
       left: 'center',
       textStyle: {
         fontSize: 20,

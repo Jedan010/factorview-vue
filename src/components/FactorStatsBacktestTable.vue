@@ -104,7 +104,7 @@ function calcPerf(returns) {
 
 <template>
   <div class="backtest-stats-table" :class="{ 'dark-mode': isDarkMode }">
-    <h2>回测收益统计</h2>
+    <h2>超额收益统计</h2>
     <table>
       <thead>
         <tr>

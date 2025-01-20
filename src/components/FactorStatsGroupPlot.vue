@@ -17,7 +17,7 @@ function initChart() {
 
   const option = {
     title: {
-      text: 'LS-Hedge 收益对比',
+      text: '分组多空收益',
       left: 'center',
       textStyle: {
         fontSize: 20,

@@ -87,7 +87,7 @@ function calcPerf(returns) {
 
 <template>
   <div class="group-stats-table" :class="{ 'dark-mode': isDarkMode }">
-    <h2>分组对冲收益统计</h2>
+    <h2>分组多空收益统计</h2>
     <table>
       <thead>
         <tr>
