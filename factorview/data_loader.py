@@ -423,6 +423,7 @@ def load_factor_update_info(
         end_date=end_date,
         **kwargs,
     )
+    factor_update_info = factor_update_info.groupby("factor_name").last()
 
     return factor_update_info
 

@@ -11,6 +11,7 @@ from .data_loader import (
     load_factor_stats_backtest,
     load_factor_stats_group,
     load_factor_stats_ic,
+    load_factor_update_info,
     load_strategy_factor_stats,
     load_strategy_info,
     load_strategy_perf,
@@ -127,6 +128,21 @@ async def get_factor_stats_ic(request: Request):
                 "index": clean_for_json(df.index),
             }
             for name, df in ic_dict.items()
+        }
+    )
+
+
+@app.get("/api/factor/stats/update")
+async def get_factor_update(request: Request):
+    """取因子更新信息"""
+    params = {k: v if v else None for k, v in request.query_params.items()}
+    if "factor_names" in params and params["factor_names"]:
+        params["factor_names"] = params["factor_names"].split(",")
+    factor_update_info = load_factor_update_info(**params)
+    return JSONResponse(
+        {
+            name: clean_for_json(factor_update_info.loc[name].to_dict())
+            for name in factor_update_info.index
         }
     )
 
