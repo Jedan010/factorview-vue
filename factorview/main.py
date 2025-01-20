@@ -44,6 +44,7 @@ def clean_for_json(data):
 
 @app.get("/api/factor")
 async def get_factor_info(request: Request):
+    """取因子基本信息"""
     factor_info = load_factor_info(**request.query_params)
     return JSONResponse(
         {
@@ -57,6 +58,7 @@ async def get_factor_info(request: Request):
 
 @app.get("/api/factor/stats")
 async def get_factor_stats(request: Request):
+    """取因子统计信息"""
     params = {k: v if v else None for k, v in request.query_params.items()}
     if "factor_names" in params and params["factor_names"]:
         params["factor_names"] = params["factor_names"].split(",")
@@ -77,6 +79,7 @@ async def get_factor_stats(request: Request):
 
 @app.get("/api/factor/stats/backtest")
 async def get_factor_stats_backtest(request: Request):
+    """取因子回测统计信息"""
     params = {k: v if v else None for k, v in request.query_params.items()}
     if "factor_names" in params and params["factor_names"]:
         params["factor_names"] = params["factor_names"].split(",")
@@ -91,8 +94,10 @@ async def get_factor_stats_backtest(request: Request):
         }
     )
 
+
 @app.get("/api/factor/stats/group")
 async def get_factor_stats_group(request: Request):
+    """取因子分组统计信息"""
     params = {k: v if v else None for k, v in request.query_params.items()}
     if "factor_names" in params and params["factor_names"]:
         params["factor_names"] = params["factor_names"].split(",")
@@ -107,8 +112,10 @@ async def get_factor_stats_group(request: Request):
         }
     )
 
+
 @app.get("/api/factor/stats/ic")
 async def get_factor_stats_ic(request: Request):
+    """取因子IC统计信息"""
     params = {k: v if v else None for k, v in request.query_params.items()}
     if "factor_names" in params and params["factor_names"]:
         params["factor_names"] = params["factor_names"].split(",")
@@ -126,6 +133,7 @@ async def get_factor_stats_ic(request: Request):
 
 @app.get("/api/factor/{factor_name}")
 async def get_factor_perf(factor_name: str, request: Request):
+    """取单个因子的表现"""
     factor_perf = load_factor_perf(factor_name, **request.query_params)
     return JSONResponse(
         {
@@ -143,6 +151,7 @@ async def get_factor_perf(factor_name: str, request: Request):
 
 @app.get("/api/strategy")
 async def get_strategy_info(request: Request):
+    """取策略基本信息"""
     strategy_info = load_strategy_info(**request.query_params)
     return JSONResponse(
         {
@@ -156,6 +165,7 @@ async def get_strategy_info(request: Request):
 
 @app.get("/api/strategy/{strategy_name}")
 async def get_strategy_perf(strategy_name: str, request: Request):
+    """取单个策略的表现"""
     (backtest_df,) = load_strategy_perf(strategy_name, **request.query_params)
     return JSONResponse(
         {
@@ -169,6 +179,7 @@ async def get_strategy_perf(strategy_name: str, request: Request):
 
 @app.get("/api/strategy/{strategy_name}/factors")
 async def get_strategy_factors(strategy_name: str, request: Request):
+    """取策略的统计表现"""
     factor_stats = load_strategy_factor_stats(strategy_name, **request.query_params)
     return JSONResponse(
         {
