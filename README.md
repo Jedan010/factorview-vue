@@ -78,7 +78,7 @@ pip install -r requirements.txt
 npm run dev
 
 # 启动后端服务
-npm run start-backend
+npm run backend
 ```
 
 ### 代码规范
