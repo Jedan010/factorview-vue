@@ -1,6 +1,8 @@
 import pandas as pd
 from quantfactor import FactorManagerAll, p, stock_calendar
 
+IS_CACHE: bool = False
+
 
 def load_factor_info(
     factor_names: list[str] = None,
@@ -38,7 +40,6 @@ def load_factor_info(
     factor_info_df = FactorManagerAll.get_info_factor(
         factor_names=factor_names,
         query=query,
-        is_cache=True,
         **kwargs,
     )
 
@@ -58,7 +59,7 @@ def load_factor_stats(
     factor_info_df = FactorManagerAll.get_info_factor(
         factor_names=factor_names,
         query=[("status not in  ('tmp')")],
-        is_cache=True,
+        is_cache=IS_CACHE,
     )
     if factor_info_df.empty:
         factor_names = pd.Index([], name="factor_name")
@@ -77,7 +78,7 @@ def load_factor_stats(
         fields=["corr"],
         index_col=["date", "factor_name"],
         query=[("pool", pool)],
-        is_cache=True,
+        is_cache=IS_CACHE,
         **kwargs,
     )
     if ic_df.empty:
@@ -117,7 +118,7 @@ def load_factor_stats(
         fields=["Group_01", "Group_10", "LS_Hedge"],
         index_col=["date", "factor_name"],
         query=[("pool", pool)],
-        is_cache=True,
+        is_cache=IS_CACHE,
         **kwargs,
     )
     if group_df.empty:
@@ -162,7 +163,7 @@ def load_factor_stats(
             ("optimizer_index", optimizer_index),
             ("benchmark_index", benchmark_index),
         ],
-        is_cache=True,
+        is_cache=IS_CACHE,
         **kwargs,
     )
     if backtest_df.empty:
@@ -236,7 +237,7 @@ def load_factor_perf(
         index_col="date",
         fields="corr",
         query=[("pool", pool)],
-        is_cache=True,
+        is_cache=IS_CACHE,
         **kwargs,
     )
     ic_df["corr_roll"] = ic_df["corr"].rolling(252, min_periods=60).mean()
@@ -262,7 +263,7 @@ def load_factor_perf(
             "LS_Hedge",
         ],
         query=[("pool", pool)],
-        is_cache=True,
+        is_cache=IS_CACHE,
         **kwargs,
     )
     backtest_df = FactorManagerAll.get_perf_factor(
@@ -284,7 +285,7 @@ def load_factor_perf(
             ("optimizer_index", optimizer_index),
             ("benchmark_index", benchmark_index),
         ],
-        is_cache=True,
+        is_cache=IS_CACHE,
         **kwargs,
     )
 
@@ -323,7 +324,7 @@ def load_factor_stats_backtest(
                 ("optimizer_index", optimizer_index),
                 ("benchmark_index", benchmark_index),
             ],
-            is_cache=True,
+            is_cache=IS_CACHE,
             **kwargs,
         )
         res[factor_name] = backtest_df
@@ -364,7 +365,7 @@ def load_factor_stats_group(
                 "LS_Hedge",
             ],
             query=[("pool", pool)],
-            is_cache=True,
+            is_cache=IS_CACHE,
             **kwargs,
         )
         res[factor_name] = group_df
@@ -399,7 +400,7 @@ def load_factor_stats_ic(
             index_col="date",
             fields="corr",
             query=[("pool", pool)],
-            is_cache=True,
+            is_cache=IS_CACHE,
             **kwargs,
         )
         ic_df["corr_roll"] = ic_df["corr"].rolling(252, min_periods=60).mean()
@@ -443,7 +444,6 @@ def load_strategy_info(
         pools=pool,
         optimizer_indexs=optimizer_index,
         benchmark_indexs=benchmark_index,
-        is_cache=True,
         **kwargs,
     )
 
@@ -476,7 +476,7 @@ def load_strategy_perf(
             ("optimizer_index", optimizer_index),
             ("benchmark_index", benchmark_index),
         ],
-        is_cache=True,
+        is_cache=IS_CACHE,
         **kwargs,
     )
     if backtest_df.empty:
